@@ -20,11 +20,12 @@ export default function CreateTaskModal({
   setData: React.Dispatch<data[]>
   fetchData: () => void
 }) {
+  const baseUrl = "https://todoappbackend-hugi.onrender.com/todos"
   const [text, setText] = useState("")
 
   async function createTask(newText: string) {
     try {
-      await axios.post(`http://localhost:5000/todos/new/`, { text: newText })
+      await axios.post(`${baseUrl}/new/`, { text: newText })
       console.log(`Task Created Successfully`)
       fetchData()
     } catch (error) {

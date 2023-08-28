@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { X, Plus, Trash, Trash2, RefreshCcw } from "lucide-react"
+import { Plus, Trash, RefreshCcw } from "lucide-react"
 import axios from "axios"
 import CreateTaskModal from "@/components/CreateTaskModal"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,6 +13,7 @@ export default function Page() {
     timeStamp: String
   }
 
+  const baseUrl = "https://todoappbackend-hugi.onrender.com/todos"
   const [data, setData] = useState<data[]>([])
   const [modal, setModal] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -20,7 +21,7 @@ export default function Page() {
   async function fetchData() {
     if (!loading) setLoading(true)
     try {
-      const response = await axios.get("http://localhost:5000/todos")
+      const response = await axios.get(`${baseUrl}`)
       const result = await response.data
       setData(result)
       setLoading(false)
@@ -36,7 +37,7 @@ export default function Page() {
 
   async function deleteTask(id: string | number) {
     try {
-      await axios.delete(`http://localhost:5000/todos/delete/${id}`)
+      await axios.delete(`${baseUrl}/delete/${id}`)
       console.log("Task deleted Successfully")
       setData(prev => {
         return prev.filter(task => task._id !== id)
@@ -48,7 +49,7 @@ export default function Page() {
 
   async function completeTask(id: string | number) {
     try {
-      await axios.put(`http://localhost:5000/todos/complete/${id}`)
+      await axios.put(`${baseUrl}/complete/${id}`)
       console.log(`Task Updated Successfully ${id}`)
     } catch (error) {
       console.error("Error Updating Task:", error)
