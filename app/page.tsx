@@ -5,7 +5,7 @@ import axios from "axios"
 import CreateTaskModal from "@/components/CreateTaskModal"
 import { Skeleton } from "@/components/ui/skeleton"
 import EditTaskModal from "@/components/EditTaskModal"
-
+import { atom, useAtom } from "jotai"
 export default function Page() {
   interface data {
     _id: String
@@ -47,13 +47,18 @@ export default function Page() {
     fetchData()
   }, [])
 
-  async function deleteTask(id: string | number) {
+  async function deleteTask(
+    id: string | number,
+    setLoadingState: React.Dispatch<boolean>
+  ) {
+    setLoadingState(true)
     try {
       await axios.delete(`${baseUrl}/delete/${id}`)
       console.log("Task deleted Successfully")
       setData(prev => {
         return prev.filter(task => task._id !== id)
       })
+      setLoadingState(false)
     } catch (error) {
       console.error("Error Deleting Task:", error)
     }
@@ -86,10 +91,10 @@ export default function Page() {
     try {
       await axios.put(`${baseUrl}/edit/${id}`, { text: text })
       console.log(`Task Edited Successfully ${id}, \n ${text} `)
+      setEditModal(false)
     } catch (error) {
       console.error("Error Updating Task:", error)
     }
-    setEditModal(false)
 
     setData(prev => {
       return prev.map(item => {
@@ -177,7 +182,6 @@ export default function Page() {
       <CreateTaskModal
         modal={modal}
         setModal={setModal}
-        setData={setData}
         fetchData={fetchData}
       />
       <EditTaskModal
@@ -190,6 +194,7 @@ export default function Page() {
     </div>
   )
 }
+export const loadingAtom = atom(false)
 
 function Task({
   children,
@@ -208,7 +213,10 @@ function Task({
     id: string | number,
     setLoadingState: React.Dispatch<boolean>
   ) => {}
-  deleteTask: (id: string | number) => {}
+  deleteTask: (
+    id: string | number,
+    setLoadingState: React.Dispatch<boolean>
+  ) => {}
   editHandler: (id: string | number, text: string) => void
 }) {
   const [loadingState, setLoadingState] = useState(false)
@@ -251,7 +259,7 @@ function Task({
             event.stopPropagation()
             editHandler(id, text)
           }}
-          className="min-w-[24px] min-h-[24px] ml-auto rounded-full lg:hover:disabled:translate-y-0 disabled:text-slate-500 text-gray-600 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+          className="min-w-[24px] min-h-[24px] ml-auto rounded-lg lg:hover:disabled:translate-y-0 disabled:text-slate-500 text-gray-600 relative lg:hover:-translate-y-1 transition-transform duration-150 "
           disabled={loadingState}
         >
           <Pencil className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5" />
@@ -260,9 +268,9 @@ function Task({
         <button
           onClick={event => {
             event.stopPropagation()
-            deleteTask(id.toString())
+            deleteTask(id.toString(), setLoadingState)
           }}
-          className="min-w-[24px] lg:hover:disabled:translate-y-0 min-h-[24px] ml-auto rounded-full disabled:text-slate-500 text-red-500 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+          className="min-w-[24px] lg:hover:disabled:translate-y-0 min-h-[24px] ml-auto rounded-lg disabled:text-slate-500 text-red-500 relative lg:hover:-translate-y-1 transition-transform duration-150 "
           disabled={loadingState}
         >
           <Trash className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5" />

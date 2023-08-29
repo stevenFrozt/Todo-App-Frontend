@@ -53,7 +53,10 @@ export default function EditTaskModal({
           />
         </div>
         <div className="flex justify-end gap-4 text-white">
-          <button className="px-4 py-2 border lg:hover:border-gray-600 lg:hover:-translate-y-1 transition-all duration-150  rounded-lg ">
+          <button
+            onClick={() => setModal(false)}
+            className="px-4 py-2 border lg:hover:border-gray-600 lg:hover:-translate-y-1 transition-all duration-150  rounded-lg "
+          >
             Cancel
           </button>
           <button
