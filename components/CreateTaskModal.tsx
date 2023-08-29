@@ -73,6 +73,7 @@ export default function CreateTaskModal({
             onClick={() => {
               createTask(text)
               setText("")
+              setModal(false)
             }}
             className="px-4 py-2 shadow-lg lg:hover:shadow-none shadow-blue-800 lg:hover:bg-blue-800 bg-blue-700 rounded-lg lg:hover:-translate-y-1 transition-all duration-150"
           >

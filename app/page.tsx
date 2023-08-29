@@ -27,10 +27,7 @@ export default function Page() {
   async function fetchData() {
     if (!loading) {
       setLoading(true)
-      console.log("Connecting to server...")
-      setTimeout(() => {
-        console.log("Server is Busy or  Offline")
-      }, 5000)
+      console.log("📡Connecting to server...")
     }
     try {
       const response = await axios.get(`${baseUrl}`)
@@ -38,6 +35,7 @@ export default function Page() {
 
       setData(result)
       setLoading(false)
+
       console.clear()
       console.log("🔥 Connected Successfully")
     } catch (error) {
@@ -61,23 +59,27 @@ export default function Page() {
     }
   }
 
-  async function completeTask(id: string | number) {
+  async function completeTask(
+    id: string | number,
+    setLoadingState: React.Dispatch<boolean>
+  ) {
+    setLoadingState(true)
     try {
       await axios.put(`${baseUrl}/complete/${id}`)
       console.log(`Task Updated Successfully ${id}`)
+      setData(prev => {
+        return prev.map(item => {
+          if (item._id === id) {
+            return { ...item, complete: !item.complete }
+          } else {
+            return { ...item }
+          }
+        })
+      })
+      setLoadingState(false)
     } catch (error) {
       console.error("Error Updating Task:", error)
     }
-
-    setData(prev => {
-      return prev.map(item => {
-        if (item._id === id) {
-          return { ...item, complete: !item.complete }
-        } else {
-          return { ...item }
-        }
-      })
-    })
   }
 
   async function saveEditTask(id: string | number, text: string) {
@@ -87,6 +89,7 @@ export default function Page() {
     } catch (error) {
       console.error("Error Updating Task:", error)
     }
+    setEditModal(false)
 
     setData(prev => {
       return prev.map(item => {
@@ -201,25 +204,42 @@ function Task({
   id: string | number
   complete: boolean
   text: string
-  completeTask: (id: string | number) => {}
+  completeTask: (
+    id: string | number,
+    setLoadingState: React.Dispatch<boolean>
+  ) => {}
   deleteTask: (id: string | number) => {}
   editHandler: (id: string | number, text: string) => void
 }) {
+  const [loadingState, setLoadingState] = useState(false)
+
   return (
     <div
-      className="bg-[#131A27] p-2 px-4 rounded-lg flex items-center lg:hover:cursor-pointer"
+      className={`bg-[#131A27] p-2 px-4 rounded-lg flex items-center lg:hover:cursor-pointer ${
+        loadingState
+          ? "animate-pulse bg-slate-700 text-muted lg:hover:cursor-default"
+          : ""
+      }`}
       onClick={() => {
-        completeTask(id.toString())
+        completeTask(id.toString(), setLoadingState)
+        setLoadingState(true)
       }}
     >
       <button
         className={`min-w-[1.25rem] min-h-[1.25rem] rounded-full ${
           complete ? "bg-green-500" : "bg-gray-800 shadow-none"
-        } lg:hover:border lg:hover:-translate-y-1 transition-transform duration-150 shadow-md lg:hover:shadow-none shadow-green-800`}
+        } lg:hover:border lg:hover:-translate-y-1 transition-transform duration-150 shadow-md lg:hover:shadow-none shadow-green-800 ${
+          loadingState ? "bg-slate-600 lg:hover:translate-y-0 " : ""
+        }
+        }`}
       ></button>
       <h3
-        className={`ml-4 w-full ${
-          complete ? "line-through text-slate-500" : "text-white"
+        className={`ml-4 w-full  ${
+          loadingState
+            ? "text-slate-800"
+            : complete
+            ? "line-through text-slate-500"
+            : "text-white"
         }`}
       >
         {children || "Task"}
@@ -231,7 +251,8 @@ function Task({
             event.stopPropagation()
             editHandler(id, text)
           }}
-          className="min-w-[24px] min-h-[24px] ml-auto rounded-full text-gray-600 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+          className="min-w-[24px] min-h-[24px] ml-auto rounded-full lg:hover:disabled:translate-y-0 disabled:text-slate-500 text-gray-600 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+          disabled={loadingState}
         >
           <Pencil className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5" />
         </button>
@@ -241,7 +262,8 @@ function Task({
             event.stopPropagation()
             deleteTask(id.toString())
           }}
-          className="min-w-[24px] min-h-[24px] ml-auto rounded-full text-red-500 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+          className="min-w-[24px] lg:hover:disabled:translate-y-0 min-h-[24px] ml-auto rounded-full disabled:text-slate-500 text-red-500 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+          disabled={loadingState}
         >
           <Trash className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5" />
         </button>
