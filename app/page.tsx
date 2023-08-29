@@ -1,9 +1,10 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Plus, Trash, RefreshCcw } from "lucide-react"
+import { Plus, Trash, RefreshCcw, Pencil } from "lucide-react"
 import axios from "axios"
 import CreateTaskModal from "@/components/CreateTaskModal"
 import { Skeleton } from "@/components/ui/skeleton"
+import EditTaskModal from "@/components/EditTaskModal"
 
 export default function Page() {
   interface data {
@@ -16,16 +17,25 @@ export default function Page() {
   const baseUrl = "https://todoappbackend-hugi.onrender.com/todos"
   const [data, setData] = useState<data[]>([])
   const [modal, setModal] = useState(false)
+  const [editModal, setEditModal] = useState(false)
+  const [editSelected, setEditSelected] = useState({ id: "", text: "" })
   const [loading, setLoading] = useState(true)
 
   async function fetchData() {
-    if (!loading) setLoading(true)
+    if (!loading) {
+      setLoading(true)
+      console.log("Connecting to server...")
+      setTimeout(() => {
+        console.log("Server is Busy or  Offline")
+      }, 5000)
+    }
     try {
       const response = await axios.get(`${baseUrl}`)
       const result = await response.data
+
       setData(result)
       setLoading(false)
-      //   console.log(result)
+      console.log("🔥 Connected Successfully")
     } catch (error) {
       console.error("Error fetching data:", error)
     }
@@ -64,6 +74,30 @@ export default function Page() {
         }
       })
     })
+  }
+
+  async function saveEditTask(id: string | number, text: string) {
+    try {
+      await axios.put(`${baseUrl}/edit/${id}`, text)
+      console.log(`Task Edited Successfully ${id}`)
+    } catch (error) {
+      console.error("Error Updating Task:", error)
+    }
+
+    setData(prev => {
+      return prev.map(item => {
+        if (item._id === id) {
+          return { ...item, text: text }
+        } else {
+          return { ...item }
+        }
+      })
+    })
+  }
+
+  function editHandler(id: string | number, text: string) {
+    setEditSelected({ id: id.toString(), text: text })
+    setEditModal(true)
   }
 
   return (
@@ -108,6 +142,8 @@ export default function Page() {
                   complete={Boolean(task.complete)}
                   completeTask={completeTask}
                   deleteTask={deleteTask}
+                  text={task.text.toString()}
+                  editHandler={editHandler}
                 >
                   {task.text}
                 </Task>
@@ -137,6 +173,13 @@ export default function Page() {
         setData={setData}
         fetchData={fetchData}
       />
+      <EditTaskModal
+        modal={editModal}
+        setModal={setEditModal}
+        saveEditTask={saveEditTask}
+        editSelected={editSelected}
+        setEditSelected={setEditSelected}
+      />
     </div>
   )
 }
@@ -146,13 +189,17 @@ function Task({
   id,
   complete,
   completeTask,
-  deleteTask
+  deleteTask,
+  editHandler,
+  text
 }: {
   children?: React.ReactNode
   id: string | number
   complete: boolean
+  text: string
   completeTask: (id: string | number) => {}
   deleteTask: (id: string | number) => {}
+  editHandler: (id: string | number, text: string) => void
 }) {
   return (
     <div
@@ -162,9 +209,6 @@ function Task({
       }}
     >
       <button
-        // onClick={() => {
-        //   completeTask(id.toString())
-        // }}
         className={`min-w-[1.25rem] min-h-[1.25rem] rounded-full ${
           complete ? "bg-green-500" : "bg-gray-800 shadow-none"
         } lg:hover:border lg:hover:-translate-y-1 transition-transform duration-150 shadow-md lg:hover:shadow-none shadow-green-800`}
@@ -176,15 +220,28 @@ function Task({
       >
         {children || "Task"}
       </h3>
-      <button
-        onClick={event => {
-          event.stopPropagation()
-          deleteTask(id.toString())
-        }}
-        className="min-w-[24px] min-h-[24px] ml-auto rounded-full text-red-500 relative lg:hover:-translate-y-1 transition-transform duration-150 "
-      >
-        <Trash className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5" />
-      </button>
+      <div className="flex items-center gap-2">
+        {/* EDIT BUTTON */}
+        <button
+          onClick={event => {
+            event.stopPropagation()
+            editHandler(id, text)
+          }}
+          className="min-w-[24px] min-h-[24px] ml-auto rounded-full text-gray-600 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+        >
+          <Pencil className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5" />
+        </button>
+        {/* DELETE BUTTON */}
+        <button
+          onClick={event => {
+            event.stopPropagation()
+            deleteTask(id.toString())
+          }}
+          className="min-w-[24px] min-h-[24px] ml-auto rounded-full text-red-500 relative lg:hover:-translate-y-1 transition-transform duration-150 "
+        >
+          <Trash className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5" />
+        </button>
+      </div>
     </div>
   )
 }
