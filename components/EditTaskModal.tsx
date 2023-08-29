@@ -1,12 +1,10 @@
+import { SetStateAction } from "jotai"
 import { X } from "lucide-react"
 
-interface data {
-  _id: String
-  text: String
-  complete: Boolean
-  timeStamp: String
+interface EditProps {
+  text: string
+  id: string | number
 }
-
 export default function EditTaskModal({
   editSelected,
   setEditSelected,
@@ -15,9 +13,9 @@ export default function EditTaskModal({
   saveEditTask
 }: {
   editSelected: { id: string | number; text: string }
-  setEditSelected: React.Dispatch<{ id: string; text: string }>
+  setEditSelected: React.Dispatch<SetStateAction<EditProps>>
   modal: boolean
-  setModal: React.Dispatch<boolean>
+  setModal: React.Dispatch<any>
   saveEditTask: (id: string | number, text: string) => void
 }) {
   return (
@@ -44,7 +42,7 @@ export default function EditTaskModal({
         <div className="py-4">
           <textarea
             onChange={event => {
-              setEditSelected((prev: { id; text }) => {
+              setEditSelected(prev => {
                 return { ...prev, text: event.target.value }
               })
             }}
@@ -61,7 +59,7 @@ export default function EditTaskModal({
           <button
             onClick={() => {
               saveEditTask(editSelected.id, editSelected.text)
-              setEditSelected((prev: { id: string | number; text: string }) => {
+              setEditSelected(prev => {
                 return { ...prev, id: "", text: "" }
               })
             }}

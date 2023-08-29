@@ -18,7 +18,10 @@ export default function Page() {
   const [data, setData] = useState<data[]>([])
   const [modal, setModal] = useState(false)
   const [editModal, setEditModal] = useState(false)
-  const [editSelected, setEditSelected] = useState({ id: "", text: "" })
+  const [editSelected, setEditSelected] = useState<{
+    id: string | number
+    text: string
+  }>({ id: "", text: "" })
   const [loading, setLoading] = useState(true)
 
   async function fetchData() {
@@ -35,6 +38,7 @@ export default function Page() {
 
       setData(result)
       setLoading(false)
+      console.clear()
       console.log("🔥 Connected Successfully")
     } catch (error) {
       console.error("Error fetching data:", error)
@@ -78,8 +82,8 @@ export default function Page() {
 
   async function saveEditTask(id: string | number, text: string) {
     try {
-      await axios.put(`${baseUrl}/edit/${id}`, text)
-      console.log(`Task Edited Successfully ${id}`)
+      await axios.put(`${baseUrl}/edit/${id}`, { text: text })
+      console.log(`Task Edited Successfully ${id}, \n ${text} `)
     } catch (error) {
       console.error("Error Updating Task:", error)
     }
