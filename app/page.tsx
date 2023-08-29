@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
-import { Plus, Trash, RefreshCcw, Pencil } from "lucide-react"
+import { Plus, Trash, RefreshCcw, Pencil, Settings } from "lucide-react"
 import axios from "axios"
 import CreateTaskModal from "@/components/CreateTaskModal"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -117,9 +117,9 @@ export default function Page() {
       className=" min-h-screen p-4
     bg-gradient-to-b from-[#1F2B3E] via-[#202B3E] to-[#171F2D]"
     >
-      <main className="max-w-2xl mx-auto md:pt-10 ">
+      <main className="max-w-2xl mx-auto md:pt-10   min-h-[90vh] ">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-medium text-white">Todo App</h1>
+          <h1 className="text-3xl font-medium text-white flex">Todo App </h1>
           {/* Create Task Button */}
           <button
             onClick={() => setModal(true)}
@@ -143,7 +143,7 @@ export default function Page() {
               <RefreshCcw className="h-5 w-5 text-white" />
             </button>
           </div>
-          <div className="max-h-[70vh] overflow-y-auto flex flex-col gap-4  track-hidden">
+          <div className="max-h-[66vh] overflow-y-auto flex flex-col gap-4  track-hidden">
             {loading ? (
               <LoadingSkeleton />
             ) : (
@@ -178,6 +178,10 @@ export default function Page() {
           )}
         </div>
       </main>
+      <div className="mt-4 max-w-2xl mx-auto text-center text-slate-700 ">
+        <span className="text-xs">Created By</span> Steven Kyle
+      </div>
+
       {/* MODAL */}
       <CreateTaskModal
         modal={modal}
