@@ -5,7 +5,6 @@ import axios from "axios"
 import CreateTaskModal from "@/components/CreateTaskModal"
 import { Skeleton } from "@/components/ui/skeleton"
 import EditTaskModal from "@/components/EditTaskModal"
-import { atom, useAtom } from "jotai"
 export default function Page() {
   interface data {
     _id: String
@@ -198,7 +197,6 @@ export default function Page() {
     </div>
   )
 }
-export const loadingAtom = atom(false)
 
 function Task({
   children,
